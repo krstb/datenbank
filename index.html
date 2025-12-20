@@ -139,7 +139,7 @@
     <script>
         let csvData = [], csvHeader = [], filteredData = [], currentFilteredIndex = -1, currentSort = { columnIndex: null, direction: 'asc' };
         
-        const DATE_HEADERS = [ 'prüf_dat', 'dat_kauf', 'gel rob', 'dat_zul', 'dat', 'dat_änd', 'dat_gepl', 'dat_eing', 'dat_prüf', 'dat_fäll' ];
+        const DATE_HEADERS = [ 'datum', 'prüf_dat', 'dat_kauf', 'gel rob', 'dat_zul', 'dat', 'dat_änd', 'dat_gepl', 'dat_eing', 'dat_prüf', 'dat_fäll' ];
 
         const STORAGE_KEYS = { DATA: 'csvData', HEADER: 'csvHeader', STATE: 'searchState', SORT: 'currentSort', FILENAME: 'csvFileName' };
         const searchContainer = document.getElementById('searchContainer'), resultsOutput = document.getElementById('resultsOutput'), resultCount = document.getElementById('resultCount'), snackbar = document.getElementById('snackbar'), rowModal = document.getElementById('rowModal'), modalContent = document.getElementById('modalContent'), exportXlsxButton = document.getElementById('exportXlsxButton'), prevButton = document.getElementById('prevButton'), nextButton = document.getElementById('nextButton'), modalCounter = document.getElementById('modalCounter'), scrollToTopBtn = document.getElementById('scrollToTopBtn'), mainTitle = document.getElementById('mainTitle'), storageHint = document.getElementById('storageHint'), columnSelect1 = document.getElementById('columnSelect1'), searchInput1 = document.getElementById('searchInput1'), columnSelect2 = document.getElementById('columnSelect2'), searchInput2 = document.getElementById('searchInput2');
@@ -356,3 +356,4 @@
     </script>
 </body>
 </html>
+
