@@ -7,6 +7,8 @@
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,322 +33,278 @@
         .results-table-container th, 
         .results-table-container td { 
             white-space: nowrap; 
-            width: 1%;            
-            padding: 8px 12px; 
-            border: 1px solid #e5e7eb;
-        }
-
-        .results-table-container thead th { 
-            position: sticky; 
-            top: 0; 
-            z-index: 10; 
-            background-color: #e5e7eb; 
-            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); 
-        }
-        mark { 
-            background-color: #fef08a; 
-            color: #000; 
-            padding: 0 1px; 
-            border-radius: 2px; 
         }
     </style>
 </head>
-<body class="p-1 sm:p-4">
+<body class="p-4 sm:p-6 lg:p-8">
 
-    <div class="container bg-white shadow-2xl rounded-xl p-3 md:p-6 max-w-7xl">
-        <h1 class="text-xl sm:text-2xl md:text-4xl font-extrabold text-gray-800 mb-4 md:mb-6 border-b pb-3 flex items-center flex-wrap gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            <span>Datenbank</span>
-            <span id="mainTitle" class="text-sm sm:text-lg md:text-2xl font-medium text-gray-500 break-all border-l pl-2 ml-1">Keine Datei geladen</span>
-            <span id="storageHint" class="text-[10px] sm:text-xs font-normal text-gray-400 italic hidden">(aus Speicher)</span>
-        </h1>
+    <div class="max-w-6xl container">
         
-        <div class="mb-6 p-2 md:p-3 border border-indigo-200 bg-indigo-50 rounded-lg flex flex-row items-center justify-between gap-2">
-            <div class="flex-shrink-0">
-                <input type="file" id="csvFile" accept=".csv,.xlsx,.xls" class="hidden" onchange="loadFile(event)">
-                <button onclick="document.getElementById('csvFile').click()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
-                    <span>Laden</span>
-                </button>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h1 id="main-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Datenbank</h1>
+                <p id="storage-hint" class="text-sm text-emerald-600 font-medium mt-1 hidden">
+                    ✓ Daten aus lokalem Speicher geladen
+                </p>
             </div>
-            <div id="data-status-info" class="text-[9px] sm:text-xs text-indigo-400 italic text-right hidden"></div>
-            <div class="flex-shrink-0">
-                 <button onclick="exportAllResultsAsXLSX()" id="exportXlsxButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm opacity-50 pointer-events-none flex items-center" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                    <span class="hidden sm:inline">Als XLSX herunterladen</span>
-                    <span class="inline sm:hidden ml-1">XLSX</span>
+            
+            <div class="flex flex-wrap gap-3">
+                <label class="flex items-center justify-center px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl shadow-sm cursor-pointer hover:bg-slate-50 transition-all font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    CSV Import
+                    <input type="file" id="csv-file" accept=".csv" class="hidden">
+                </label>
+                
+                <button onclick="exportToXLSX()" class="flex items-center justify-center px-4 py-2 bg-slate-900 text-white rounded-xl shadow-sm hover:bg-slate-800 transition-all font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Excel Export
                 </button>
             </div>
         </div>
 
-        <div id="searchContainer" class="mb-6 p-3 md:p-4 border border-gray-300 rounded-lg opacity-50 pointer-events-none transition duration-300 space-y-2">
-            <label class="block text-base md:text-lg font-semibold text-gray-700">Suchkriterien</label>
-            <div class="flex gap-2 md:gap-3 items-end">
-                <div class="w-1/2">
-                    <label for="columnSelect1" class="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1 uppercase tracking-wider">Spalte:</label>
-                    <select id="columnSelect1" class="w-full p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="handleColumnChange(1); saveState();"></select>
+        <div id="search-container" class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8 opacity-50 pointer-events-none transition-opacity">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Primärer Filter</label>
+                    <div class="flex shadow-sm rounded-xl overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                        <select id="column-select-1" class="bg-slate-50 border-r border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 outline-none w-1/3">
+                            <option value="all">Alle Spalten</option>
+                        </select>
+                        <input type="text" id="search-input-1" placeholder="Suchen..." class="w-2/3 px-4 py-2 text-slate-900 outline-none">
+                    </div>
                 </div>
-                <div class="w-1/2">
-                    <label for="searchInput1" class="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1 uppercase tracking-wider">Suchbegriff:</label>
-                    <input type="text" id="searchInput1" placeholder="=10, >10, leer, nicht leer, Müller" class="w-full p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="searchCSV(); saveState();">
-                </div>
-            </div>
-            <div class="flex items-center py-1">
-                <div class="flex-grow border-t border-gray-300"></div>
-                <span class="flex-shrink mx-3 text-[10px] text-gray-400 font-bold">UND</span>
-                <div class="flex-grow border-t border-gray-300"></div>
-            </div>
-            <div class="flex gap-2 md:gap-3 items-end">
-                <div class="w-1/2">
-                    <label for="columnSelect2" class="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1 uppercase tracking-wider">Spalte:</label>
-                    <select id="columnSelect2" class="w-full p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" onchange="handleColumnChange(2); saveState();"></select>
-                </div>
-                <div class="w-1/2">
-                    <label for="searchInput2" class="block text-[10px] sm:text-xs font-medium text-gray-700 mb-1 uppercase tracking-wider">Suchbegriff:</label>
-                    <input type="text" id="searchInput2" placeholder="=10, >10, leer, nicht leer, Müller" class="w-full p-1.5 sm:p-2 text-xs sm:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" oninput="searchCSV(); saveState();">
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Sekundärer Filter</label>
+                    <div class="flex shadow-sm rounded-xl overflow-hidden border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                        <select id="column-select-2" class="bg-slate-50 border-r border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 outline-none w-1/3">
+                            <option value="all">Alle Spalten</option>
+                        </select>
+                        <input type="text" id="search-input-2" placeholder="Suchen..." class="w-2/3 px-4 py-2 text-slate-900 outline-none">
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="mt-6 md:mt-10">
-            <div class="flex flex-row justify-between items-center mb-3">
-                <h2 id="resultsHeader" class="text-lg md:text-2xl font-bold text-gray-800"><span id="resultCount">0</span> Ergebnisse</h2>
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-4 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center">
+                <span id="results-count" class="text-sm font-bold text-slate-500 uppercase tracking-widest">Keine Daten geladen</span>
+                <span class="text-xs text-slate-400 font-medium">Klick auf Zeile für Details</span>
             </div>
-            <div id="resultsOutput" class="results-table-container shadow-inner bg-gray-50 rounded-lg">
-                <p class="text-gray-500 p-3 text-xs sm:text-sm">Bitte Datei laden.</p>
+            <div class="results-table-container">
+                <table class="w-full text-left text-sm">
+                    <thead id="table-head" class="bg-white sticky top-0 z-10 border-b border-slate-200">
+                        </thead>
+                    <tbody id="table-body" class="divide-y divide-slate-100">
+                        </tbody>
+                </table>
             </div>
         </div>
     </div>
 
-    <button id="scrollToTopBtn" onclick="scrollToTop()" class="hidden fixed bottom-6 right-6 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-lg z-20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" /></svg>
-    </button>
-
-    <div id="rowModal" class="fixed inset-0 hidden items-center justify-center modal-overlay" onclick="closeRowPopup()">
-        <div class="bg-white rounded-xl shadow-2xl p-4 md:p-8 max-w-lg w-11/12 modal-fixed-height" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-start border-b pb-2 mb-4 flex-shrink-0">
-                <h3 class="text-lg font-bold text-gray-900">Details (<span id="modalCounter">1/1</span>)</h3>
-                <button onclick="closeRowPopup()" class="text-gray-400 hover:text-gray-600">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg modal-fixed-height">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-900">Datensatz-Details</h2>
+                <button onclick="closeModal()" class="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                 </button>
             </div>
-            <div id="modalContent" class="modal-content-scroll text-xs sm:text-sm"></div>
-            <div class="mt-4 pt-4 border-t flex justify-between gap-2 flex-shrink-0">
-                <button id="prevButton" onclick="navigateRow(-1)" disabled class="flex items-center bg-gray-200 py-1.5 px-3 rounded-lg text-xs font-bold">Zurück</button>
-                <button id="nextButton" onclick="navigateRow(1)" disabled class="flex items-center bg-indigo-500 text-white py-1.5 px-3 rounded-lg text-xs font-bold">Weiter</button>
+            <div id="modal-content" class="modal-content-scroll p-6 space-y-4">
+                </div>
+            <div class="p-4 bg-slate-50 border-t border-slate-100 rounded-b-3xl">
+                <button onclick="closeModal()" class="w-full py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition-colors">Schließen</button>
             </div>
         </div>
     </div>
-    
-    <div id="snackbar" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none"></div>
 
     <script>
-        // PWA Service Worker Registrierung
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error', err));
-            });
-        }
+        const STORAGE_KEYS = {
+            DATA: 'csv_data_store',
+            HEADER: 'csv_header_store',
+            FILENAME: 'csv_filename_store',
+            STATE: 'csv_search_state',
+            SORT: 'csv_sort_state'
+        };
 
-        let csvData = [], csvHeader = [], filteredData = [], currentFilteredIndex = -1, currentSort = { columnIndex: null, direction: 'asc' };
-        
-        const DATE_HEADERS = [ 'datum', 'prüf_dat', 'dat_kauf', 'gel rob', 'dat_zul', 'dat', 'dat_änd', 'dat_gepl', 'dat_eing', 'dat_prüf', 'dat_fäll' ];
+        let csvData = [];
+        let csvHeader = [];
+        let filteredData = [];
+        let currentSort = { columnIndex: null, direction: 'asc' };
 
-        const STORAGE_KEYS = { DATA: 'csvData', HEADER: 'csvHeader', STATE: 'searchState', SORT: 'currentSort', FILENAME: 'csvFileName', TIMESTAMP: 'csvTimestamp' };
-        const searchContainer = document.getElementById('searchContainer'), resultsOutput = document.getElementById('resultsOutput'), resultCount = document.getElementById('resultCount'), snackbar = document.getElementById('snackbar'), rowModal = document.getElementById('rowModal'), modalContent = document.getElementById('modalContent'), exportXlsxButton = document.getElementById('exportXlsxButton'), prevButton = document.getElementById('prevButton'), nextButton = document.getElementById('nextButton'), modalCounter = document.getElementById('modalCounter'), scrollToTopBtn = document.getElementById('scrollToTopBtn'), mainTitle = document.getElementById('mainTitle'), storageHint = document.getElementById('storageHint'), columnSelect1 = document.getElementById('columnSelect1'), searchInput1 = document.getElementById('searchInput1'), columnSelect2 = document.getElementById('columnSelect2'), searchInput2 = document.getElementById('searchInput2'), dataStatusInfo = document.getElementById('data-status-info');
+        const fileInput = document.getElementById('csv-file');
+        const mainTitle = document.getElementById('main-title');
+        const storageHint = document.getElementById('storage-hint');
+        const searchContainer = document.getElementById('search-container');
+        const columnSelect1 = document.getElementById('column-select-1');
+        const columnSelect2 = document.getElementById('column-select-2');
+        const searchInput1 = document.getElementById('search-input-1');
+        const searchInput2 = document.getElementById('search-input-2');
+        const tableHead = document.getElementById('table-head');
+        const tableBody = document.getElementById('table-body');
+        const resultsCount = document.getElementById('results-count');
+        const detailModal = document.getElementById('detail-modal');
+        const modalContent = document.getElementById('modal-content');
 
-        function scrollToTop() { resultsOutput.scrollTo({ top: 0, behavior: 'smooth' }); }
-        resultsOutput.onscroll = () => { scrollToTopBtn.classList.toggle('hidden', resultsOutput.scrollTop < 200 || filteredData.length === 0); };
-        function showSnackbar(msg) { snackbar.textContent = msg; snackbar.classList.add('opacity-100'); setTimeout(() => snackbar.classList.remove('opacity-100'), 2500); }
-        
-        function updateExportButtonsState() { 
-            const hasData = filteredData.length > 0;
-            exportXlsxButton.disabled = !hasData;
-            if (hasData) exportXlsxButton.classList.remove('opacity-50', 'pointer-events-none');
-            else exportXlsxButton.classList.add('opacity-50', 'pointer-events-none');
-        }
+        fileInput.addEventListener('change', handleFileUpload);
+        [searchInput1, searchInput2, columnSelect1, columnSelect2].forEach(el => {
+            el.addEventListener('input', () => searchCSV());
+        });
 
-        function saveState() { 
-            localStorage.setItem(STORAGE_KEYS.STATE, JSON.stringify({ col1: columnSelect1.value, input1: searchInput1.value, col2: columnSelect2.value, input2: searchInput2.value }));
-            localStorage.setItem(STORAGE_KEYS.SORT, JSON.stringify(currentSort)); 
-        }
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        function updateDataStatusHint(timestamp) {
-            if (!timestamp) { dataStatusInfo.classList.add('hidden'); return; }
-            const dt = new Date(parseInt(timestamp));
-            dataStatusInfo.textContent = `Stand: ${dt.toLocaleDateString('de-DE')} ${dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})}`;
-            dataStatusInfo.classList.remove('hidden');
-        }
-
-        function isDateColumn(headerText) {
-            if (!headerText) return false;
-            const lowerHeader = String(headerText).trim().toLowerCase();
-            return DATE_HEADERS.some(keyword => lowerHeader.includes(keyword.toLowerCase()));
-        }
-
-        function highlightText(text, term) {
-            if (!term || term.trim() === '' || term.startsWith('>') || term.startsWith('<') || term.startsWith('=') || term.toLowerCase() === 'leer' || term.toLowerCase() === 'nicht leer') return text;
-            const cleanTerm = term.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            return String(text).replace(new RegExp(`(${cleanTerm})`, 'gi'), '<mark>$1</mark>');
-        }
-
-        function convertDateToExcelNumber(dateStr) {
-            if (typeof dateStr !== 'string' || !dateStr.trim()) return NaN;
-            const norm = dateStr.trim().replace(/[/,-]/g, '.');
-            const p = norm.split('.');
-            if (p.length !== 3) return NaN;
-            let d = parseInt(p[0]), m = parseInt(p[1]) - 1, y = parseInt(p[2]);
-            if (isNaN(d) || isNaN(m) || isNaN(y)) return NaN;
-            if (y >= 0 && y < 100) y += (y < 50 ? 2000 : 1900);
-            const dt = new Date(Date.UTC(y, m, d));
-            const start = new Date(Date.UTC(1899, 11, 30));
-            let res = (dt.getTime() - start.getTime()) / 86400000;
-            return res > 59 ? res + 1 : res;
-        }
-
-        function convertExcelDate(n) {
-            if (typeof n !== 'number' || n < 1) return n;
-            const d = new Date(Date.UTC(1899, 11, 30) + (Math.floor(n) - (n > 60 ? 1 : 0)) * 86400000);
-            return `${String(d.getUTCDate()).padStart(2,'0')}.${String(d.getUTCMonth()+1).padStart(2,'0')}.${d.getUTCFullYear()}`;
-        }
-
-        function clearFiltersAndSort() {
-            searchInput1.value = '';
-            columnSelect1.value = 'all';
-            searchInput2.value = '';
-            columnSelect2.value = 'all';
-            currentSort = { columnIndex: null, direction: 'asc' };
-            saveState();
-        }
-
-        async function loadFile(e) {
-            const f = e.target.files[0]; if (!f) return;
-            clearFiltersAndSort();
-            mainTitle.textContent = f.name; storageHint.classList.add('hidden');
-            const now = Date.now().toString();
-            updateDataStatusHint(now);
             const reader = new FileReader();
-            reader.onload = (ex) => {
-                const data = new Uint8Array(ex.target.result);
-                const wb = XLSX.read(data, { type: 'array' });
-                const ws = wb.Sheets[wb.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
-                if (json.length > 0) {
-                    csvHeader = json[0].map(h => String(h || '').trim());
-                    csvData = json.slice(1).map(r => ({ data: r.map(c => c === null || c === undefined ? '' : c) }));
+            reader.onload = function(event) {
+                const text = event.target.result;
+                const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+                
+                if (lines.length > 0) {
+                    csvHeader = parseCSVLine(lines[0]);
+                    csvData = lines.slice(1).map((line, idx) => ({
+                        id: idx,
+                        data: parseCSVLine(line)
+                    }));
+
                     localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(csvData));
                     localStorage.setItem(STORAGE_KEYS.HEADER, JSON.stringify(csvHeader));
-                    localStorage.setItem(STORAGE_KEYS.FILENAME, f.name);
-                    localStorage.setItem(STORAGE_KEYS.TIMESTAMP, now);
+                    localStorage.setItem(STORAGE_KEYS.FILENAME, file.name);
+                    
+                    mainTitle.textContent = file.name;
+                    storageHint.classList.add('hidden');
                     searchContainer.classList.remove('opacity-50', 'pointer-events-none');
-                    populateColumnSelector(); 
-                    searchCSV();
+                    
+                    populateColumnSelector();
+                    searchCSV(true);
                 }
             };
-            reader.readAsArrayBuffer(f);
+            reader.readAsText(file);
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') inQuotes = !inQuotes;
+                else if (char === ';' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else current += char;
+            }
+            result.push(current.trim());
+            return result;
         }
 
         function populateColumnSelector() {
-            const opts = `<option value="all">Alle Spalten</option>` + csvHeader.map((h, i) => `<option value="${i}">${h}</option>`).join('');
-            columnSelect1.innerHTML = opts; columnSelect2.innerHTML = opts;
+            const options = `<option value="all">Alle Spalten</option>` + 
+                csvHeader.map((h, i) => `<option value="${i}">${h}</option>`).join('');
+            columnSelect1.innerHTML = options;
+            columnSelect2.innerHTML = options;
         }
 
-        function handleColumnChange(n) { searchCSV(); }
-
-        function checkMatch(val, header, term) {
-            const t = term.trim().toLowerCase(); if (!t) return true;
-            const isDate = isDateColumn(header);
-            const vStr = String(val).toLowerCase();
-            if (t === 'leer') return val === '';
-            if (t === 'nicht leer') return val !== '';
-            if (t.startsWith('>') || t.startsWith('<') || t.startsWith('=')) {
-                let numV = isDate ? (typeof val === 'number' ? val : convertDateToExcelNumber(String(val))) : parseFloat(String(val).replace(',', '.'));
-                let op = t.startsWith('>=') || t.startsWith('<=') ? t.substring(0,2) : t.substring(0,1);
-                let comp = t.substring(op.length).replace(',', '.');
-                let numC = isDate ? convertDateToExcelNumber(comp) : parseFloat(comp);
-                if (isNaN(numV) || isNaN(numC)) return false;
-                if (op === '>') return numV > numC; if (op === '<') return numV < numC;
-                if (op === '>=') return numV >= numC; if (op === '<=') return numV <= numC;
-                if (op === '=') return numV === numC;
+        function searchCSV(resetSearch = false) {
+            if (resetSearch) {
+                searchInput1.value = ''; searchInput2.value = '';
+                columnSelect1.value = 'all'; columnSelect2.value = 'all';
             }
-            return vStr.includes(t);
-        }
 
-        function searchCSV(noSave = false) {
-            const t1 = searchInput1.value, c1 = columnSelect1.value, t2 = searchInput2.value, c2 = columnSelect2.value;
-            filteredData = csvData.filter(r => {
-                const m1 = c1 === 'all' ? r.data.some((v, i) => checkMatch(v, csvHeader[i], t1)) : checkMatch(r.data[c1], csvHeader[c1], t1);
-                const m2 = c2 === 'all' ? r.data.some((v, i) => checkMatch(v, csvHeader[i], t2)) : checkMatch(r.data[c2], csvHeader[c2], t2);
-                return m1 && m2;
+            const val1 = searchInput1.value.toLowerCase();
+            const col1 = columnSelect1.value;
+            const val2 = searchInput2.value.toLowerCase();
+            const col2 = columnSelect2.value;
+
+            localStorage.setItem(STORAGE_KEYS.STATE, JSON.stringify({
+                col1, input1: val1, col2, input2: val2
+            }));
+
+            filteredData = csvData.filter(row => {
+                const match1 = col1 === 'all' 
+                    ? row.data.some(cell => String(cell).toLowerCase().includes(val1))
+                    : String(row.data[col1]).toLowerCase().includes(val1);
+                
+                const match2 = col2 === 'all'
+                    ? row.data.some(cell => String(cell).toLowerCase().includes(val2))
+                    : String(row.data[col2]).toLowerCase().includes(val2);
+                
+                return match1 && match2;
             });
-            applySort(currentSort.columnIndex, currentSort.direction, noSave);
+
+            if (currentSort.columnIndex !== null) {
+                applySort();
+            } else {
+                renderTable();
+            }
         }
 
-        function applySort(idx, dir, force = false) {
-            if (idx === null) { renderTable(); return; }
-            currentSort = { columnIndex: idx, direction: dir };
-            const isDate = isDateColumn(csvHeader[idx]);
+        function handleSort(index) {
+            if (currentSort.columnIndex === index) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.columnIndex = index;
+                currentSort.direction = 'asc';
+            }
+            localStorage.setItem(STORAGE_KEYS.SORT, JSON.stringify(currentSort));
+            applySort();
+        }
+
+        function applySort() {
+            const idx = currentSort.columnIndex;
+            const dir = currentSort.direction === 'asc' ? 1 : -1;
+
             filteredData.sort((a, b) => {
-                let vA = a.data[idx], vB = b.data[idx];
-                if (isDate) {
-                    vA = typeof vA === 'number' ? vA : (convertDateToExcelNumber(String(vA)) || 0);
-                    vB = typeof vB === 'number' ? vB : (convertDateToExcelNumber(String(vB)) || 0);
-                } else {
-                    const nA = parseFloat(String(vA).replace(',','.')), nB = parseFloat(String(vB).replace(',','.'));
-                    if (!isNaN(nA) && !isNaN(nB)) { vA = nA; vB = nB; }
-                    else { vA = String(vA).toLowerCase(); vB = String(vB).toLowerCase(); }
-                }
-                if (vA < vB) return dir === 'asc' ? -1 : 1;
-                if (vA > vB) return dir === 'asc' ? 1 : -1;
-                return 0;
+                const valA = String(a.data[idx]);
+                const valB = String(b.data[idx]);
+                return valA.localeCompare(valB, undefined, {numeric: true, sensitivity: 'base'}) * dir;
             });
-            renderTable(); if (!force) saveState();
+
+            renderTable();
         }
 
         function renderTable() {
-            resultCount.textContent = filteredData.length;
-            if (filteredData.length === 0) { resultsOutput.innerHTML = '<p class="p-3 text-xs">Keine Treffer.</p>'; updateExportButtonsState(); return; }
+            resultsCount.textContent = `${filteredData.length} Ergebnisse gefunden`;
             
-            const t1 = searchInput1.value, t2 = searchInput2.value;
-            let h = `<table class="text-left border-collapse text-[10px] sm:text-xs"><thead><tr>`;
-            csvHeader.forEach((head, i) => {
-                const icon = currentSort.columnIndex === i ? (currentSort.direction === 'asc' ? ' ▲' : ' ▼') : '';
-                h += `<th class="p-2 bg-gray-200 border cursor-pointer hover:bg-gray-300" onclick="applySort(${i}, '${currentSort.columnIndex === i && currentSort.direction === 'asc' ? 'desc' : 'asc'}')">${head}${icon}</th>`;
-            });
-            h += `</tr></thead><tbody>`;
-            filteredData.slice(0, 5000).forEach((r, i) => {
-                h += `<tr class="hover:bg-indigo-50 cursor-pointer" onclick="showRowPopup(${i})">`;
-                r.data.forEach((c, j) => {
-                    let val = isDateColumn(csvHeader[j]) && typeof c === 'number' ? convertExcelDate(c) : c;
-                    val = highlightText(val, t1);
-                    val = highlightText(val, t2);
-                    h += `<td class="p-2 border">${val}</td>`;
-                });
-                h += `</tr>`;
-            });
-            h += `</tbody></table>`;
-            resultsOutput.innerHTML = h; updateExportButtonsState();
+            tableHead.innerHTML = `<tr>${csvHeader.map((h, i) => `
+                <th onclick="handleSort(${i})" class="px-4 py-4 font-bold text-slate-700 cursor-pointer hover:bg-slate-50 transition-colors relative">
+                    <div class="flex items-center">
+                        ${h}
+                        <span class="ml-2 text-slate-300">
+                            ${currentSort.columnIndex === i ? (currentSort.direction === 'asc' ? '↑' : '↓') : '↕'}
+                        </span>
+                    </div>
+                </th>`).join('')}</tr>`;
+
+            tableBody.innerHTML = filteredData.map(row => `
+                <tr onclick="showDetails(${row.id})" class="hover:bg-blue-50/50 cursor-pointer transition-colors group">
+                    ${row.data.map(cell => `<td class="px-4 py-4 text-slate-600 border-b border-slate-50 group-last:border-none">${cell}</td>`).join('')}
+                </tr>`).join('');
         }
 
-        function showRowPopup(idx) {
-            currentFilteredIndex = idx; const r = filteredData[idx]; modalCounter.textContent = `${idx + 1}/${filteredData.length}`;
-            prevButton.disabled = idx === 0; nextButton.disabled = idx === filteredData.length - 1;
-            const t1 = searchInput1.value.trim(), t2 = searchInput2.value.trim();
-            modalContent.innerHTML = csvHeader.map((h, i) => {
-                let val = isDateColumn(h) && typeof r.data[i] === 'number' ? convertExcelDate(r.data[i]) : r.data[i];
-                val = highlightText(val, t1);
-                val = highlightText(val, t2);
-                return `<div class="grid grid-cols-3 gap-2 py-2 border-b text-xs ${i % 2 ? 'bg-gray-50' : ''}"><span class="font-bold text-gray-600">${h}</span><span class="col-span-2 break-all">${val}</span></div>`;
-            }).join('');
-            rowModal.classList.replace('hidden', 'flex');
+        function showDetails(rowId) {
+            const row = csvData.find(r => r.id === rowId);
+            modalContent.innerHTML = csvHeader.map((h, i) => `
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">${h}</label>
+                    <p class="text-slate-900 font-semibold break-words">${row.data[i] || '-'}</p>
+                </div>`).join('');
+            detailModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
         }
 
-        function closeRowPopup() { rowModal.classList.replace('flex', 'hidden'); }
-        function navigateRow(d) { const n = currentFilteredIndex + d; if (n >= 0 && n < filteredData.length) showRowPopup(n); }
-        
-        function exportAllResultsAsXLSX() {
+        function closeModal() {
+            detailModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function exportToXLSX() {
             const ws = XLSX.utils.aoa_to_sheet([csvHeader, ...filteredData.map(r => r.data)]);
             const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Export");
             XLSX.writeFile(wb, "export.xlsx");
@@ -358,7 +316,6 @@
                 csvData = JSON.parse(d); csvHeader = JSON.parse(h);
                 mainTitle.textContent = localStorage.getItem(STORAGE_KEYS.FILENAME) || "Geladen";
                 storageHint.classList.remove('hidden');
-                updateDataStatusHint(localStorage.getItem(STORAGE_KEYS.TIMESTAMP));
                 searchContainer.classList.remove('opacity-50', 'pointer-events-none');
                 populateColumnSelector();
                 
@@ -370,13 +327,19 @@
                 if (savedSort) {
                     currentSort = JSON.parse(savedSort);
                 } else {
-                    currentSort = {columnIndex: null, direction: 'asc'};
+                    currentSort = {columnIndex: null, direction: 'asc' };
                 }
                 
-                searchCSV(true); 
+                searchCSV();
+            }
+
+            // Service Worker Registrierung
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(function(err) {
+                    /* Fehler unterdrückt */
+                });
             }
         };
     </script>
 </body>
 </html>
-
