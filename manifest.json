@@ -1,7 +1,7 @@
 {
   "short_name": "Datenbank",
   "name": "App öffnet Excel-Dateien",
-  "description": "Zum Betrachten von Daten aus Access-Exportierten Excel-Dateien",
+  "description": "Zum filtern und sortieren von Daten aus Access-Exportierten Excel-Dateien",
   "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
