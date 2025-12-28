@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Datenbank</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
@@ -26,7 +31,7 @@
         .results-table-container th, 
         .results-table-container td { 
             white-space: nowrap; 
-            width: 1%;           
+            width: 1%;            
             padding: 8px 12px; 
             border: 1px solid #e5e7eb;
         }
@@ -66,6 +71,7 @@
                     <span>Laden</span>
                 </button>
             </div>
+            <div id="data-status-info" class="text-[9px] sm:text-xs text-indigo-400 italic text-right hidden"></div>
             <div class="flex-shrink-0">
                  <button onclick="exportAllResultsAsXLSX()" id="exportXlsxButton" class="bg-green-600 hover:bg-green-700 text-white font-bold py-1.5 px-3 sm:py-2 sm:px-4 rounded-lg shadow-md transition duration-150 ease-in-out text-xs sm:text-sm opacity-50 pointer-events-none flex items-center" disabled>
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5 sm:mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
@@ -137,12 +143,19 @@
     <div id="snackbar" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none"></div>
 
     <script>
+        // PWA Service Worker Registrierung
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Error', err));
+            });
+        }
+
         let csvData = [], csvHeader = [], filteredData = [], currentFilteredIndex = -1, currentSort = { columnIndex: null, direction: 'asc' };
         
         const DATE_HEADERS = [ 'datum', 'prüf_dat', 'dat_kauf', 'gel rob', 'dat_zul', 'dat', 'dat_änd', 'dat_gepl', 'dat_eing', 'dat_prüf', 'dat_fäll' ];
 
-        const STORAGE_KEYS = { DATA: 'csvData', HEADER: 'csvHeader', STATE: 'searchState', SORT: 'currentSort', FILENAME: 'csvFileName' };
-        const searchContainer = document.getElementById('searchContainer'), resultsOutput = document.getElementById('resultsOutput'), resultCount = document.getElementById('resultCount'), snackbar = document.getElementById('snackbar'), rowModal = document.getElementById('rowModal'), modalContent = document.getElementById('modalContent'), exportXlsxButton = document.getElementById('exportXlsxButton'), prevButton = document.getElementById('prevButton'), nextButton = document.getElementById('nextButton'), modalCounter = document.getElementById('modalCounter'), scrollToTopBtn = document.getElementById('scrollToTopBtn'), mainTitle = document.getElementById('mainTitle'), storageHint = document.getElementById('storageHint'), columnSelect1 = document.getElementById('columnSelect1'), searchInput1 = document.getElementById('searchInput1'), columnSelect2 = document.getElementById('columnSelect2'), searchInput2 = document.getElementById('searchInput2');
+        const STORAGE_KEYS = { DATA: 'csvData', HEADER: 'csvHeader', STATE: 'searchState', SORT: 'currentSort', FILENAME: 'csvFileName', TIMESTAMP: 'csvTimestamp' };
+        const searchContainer = document.getElementById('searchContainer'), resultsOutput = document.getElementById('resultsOutput'), resultCount = document.getElementById('resultCount'), snackbar = document.getElementById('snackbar'), rowModal = document.getElementById('rowModal'), modalContent = document.getElementById('modalContent'), exportXlsxButton = document.getElementById('exportXlsxButton'), prevButton = document.getElementById('prevButton'), nextButton = document.getElementById('nextButton'), modalCounter = document.getElementById('modalCounter'), scrollToTopBtn = document.getElementById('scrollToTopBtn'), mainTitle = document.getElementById('mainTitle'), storageHint = document.getElementById('storageHint'), columnSelect1 = document.getElementById('columnSelect1'), searchInput1 = document.getElementById('searchInput1'), columnSelect2 = document.getElementById('columnSelect2'), searchInput2 = document.getElementById('searchInput2'), dataStatusInfo = document.getElementById('data-status-info');
 
         function scrollToTop() { resultsOutput.scrollTo({ top: 0, behavior: 'smooth' }); }
         resultsOutput.onscroll = () => { scrollToTopBtn.classList.toggle('hidden', resultsOutput.scrollTop < 200 || filteredData.length === 0); };
@@ -158,6 +171,13 @@
         function saveState() { 
             localStorage.setItem(STORAGE_KEYS.STATE, JSON.stringify({ col1: columnSelect1.value, input1: searchInput1.value, col2: columnSelect2.value, input2: searchInput2.value }));
             localStorage.setItem(STORAGE_KEYS.SORT, JSON.stringify(currentSort)); 
+        }
+
+        function updateDataStatusHint(timestamp) {
+            if (!timestamp) { dataStatusInfo.classList.add('hidden'); return; }
+            const dt = new Date(parseInt(timestamp));
+            dataStatusInfo.textContent = `Stand: ${dt.toLocaleDateString('de-DE')} ${dt.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})}`;
+            dataStatusInfo.classList.remove('hidden');
         }
 
         function isDateColumn(headerText) {
@@ -203,8 +223,10 @@
 
         async function loadFile(e) {
             const f = e.target.files[0]; if (!f) return;
-            clearFiltersAndSort(); // Reset bei neuer Datei
+            clearFiltersAndSort();
             mainTitle.textContent = f.name; storageHint.classList.add('hidden');
+            const now = Date.now().toString();
+            updateDataStatusHint(now);
             const reader = new FileReader();
             reader.onload = (ex) => {
                 const data = new Uint8Array(ex.target.result);
@@ -217,6 +239,7 @@
                     localStorage.setItem(STORAGE_KEYS.DATA, JSON.stringify(csvData));
                     localStorage.setItem(STORAGE_KEYS.HEADER, JSON.stringify(csvHeader));
                     localStorage.setItem(STORAGE_KEYS.FILENAME, f.name);
+                    localStorage.setItem(STORAGE_KEYS.TIMESTAMP, now);
                     searchContainer.classList.remove('opacity-50', 'pointer-events-none');
                     populateColumnSelector(); 
                     searchCSV();
@@ -258,7 +281,6 @@
                 const m2 = c2 === 'all' ? r.data.some((v, i) => checkMatch(v, csvHeader[i], t2)) : checkMatch(r.data[c2], csvHeader[c2], t2);
                 return m1 && m2;
             });
-            // Beim Auffrischen (noSave=true) wenden wir die geladene Sortierung an
             applySort(currentSort.columnIndex, currentSort.direction, noSave);
         }
 
@@ -336,6 +358,7 @@
                 csvData = JSON.parse(d); csvHeader = JSON.parse(h);
                 mainTitle.textContent = localStorage.getItem(STORAGE_KEYS.FILENAME) || "Geladen";
                 storageHint.classList.remove('hidden');
+                updateDataStatusHint(localStorage.getItem(STORAGE_KEYS.TIMESTAMP));
                 searchContainer.classList.remove('opacity-50', 'pointer-events-none');
                 populateColumnSelector();
                 
@@ -356,4 +379,3 @@
     </script>
 </body>
 </html>
-
