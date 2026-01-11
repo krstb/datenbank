@@ -27,31 +27,23 @@
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
         
-       <style>
-        /* Fix für PWA-Ränder und Hintergrund wie bei Arbeitstage */
+       /* Fix für PWA-Ränder */
         html {
-            background-color: #000000 !important;
+            background-color: #FFFFFF !important;
         } 
                 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: #C7C9C3 !important; /* Dein gewünschtes Grau */
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
-        
-        /* WICHTIG: Begrenzung der Tabellenhöhe, damit der Kasten nicht zu hoch wird */
-        .results-table-container { 
-            overflow-x: auto;
-            max-height: 60vh; /* Verhindert das Überstehen unten */
-            overflow-y: auto; 
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #C7C9C3; }
+        .container { margin: 0 auto; }
         .modal-overlay { background-color: rgba(0, 0, 0, 0.7); z-index: 50; }
         .modal-fixed-height { display: flex; flex-direction: column; max-height: 90vh; }
         .modal-content-scroll { flex-grow: 1; overflow-y: auto; padding-bottom: 1rem; }
         
-      }
+        .results-table-container { 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch; 
+            max-height: 65vh; 
+            overflow-y: auto; 
+        }
         .results-table-container table { 
             table-layout: auto; 
             border-collapse: collapse;
@@ -64,7 +56,13 @@
             border: 1px solid #e5e7eb;
         }
 
-        
+        .results-table-container thead th { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
+            background-color: #e5e7eb; 
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1); 
+        }
         mark { 
             background-color: #fef08a; 
             color: #000; 
@@ -73,10 +71,9 @@
         }
     </style>
 </head>
-<body class="flex flex-col items-center justify-start p-4 pt-4">
+<body class="p-1 sm:p-4">
 
-    <div class="w-full max-w-[95%] lg:max-w-7xl bg-[#f7f9fb] shadow-2xl rounded-xl p-4 md:p-6 mx-auto mb-8">
-    <div class="w-ful bg-[#f7f9fb] shadow-2xl rounded-xl p-8 max-w-7xl mx-auto">
+    <div class="container bg-[#f7f9fb] shadow-2xl rounded-xl p-4 md:p-4 max-w-7xl">
         <h1 class="text-xl sm:text-2xl md:text-4xl font-extrabold text-gray-800 mb-4 md:mb-6 border-b pb-3 flex items-center flex-wrap gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -384,10 +381,6 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
